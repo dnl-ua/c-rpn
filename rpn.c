@@ -81,22 +81,24 @@ parse(char* s)
 	while (s[++i]) {
 		if (s[i] != ' ') {
 			if (isdigit(s[i])) {
-				sprintf(output, "%s %c", output, s[i]);
-			}
+				sprintf(output, "%s%c", output, s[i]);
+			} else {
+				sprintf(output, "%s ", output);
 
-			else if (s[i] == ')') {
-				while (top(operators) != '(') {
-					sprintf(output, "%s %c", output, pop(operators));
+				if (s[i] == ')') {
+					while (top(operators) != '(') {
+						sprintf(output, "%s %c", output, pop(operators));
+					}
+					pop(operators);
 				}
-				pop(operators);
-			}
-			else if (check_priority(s[i]) <= check_priority(top(operators)) &&
-				 check_priority(s[i]) != 0) {
-				stack_to_string(operators, &output);
-				push(operators, s[i]);
-			}
-			else {
-				push(operators, s[i]);
+				else if (check_priority(s[i]) <= check_priority(top(operators)) &&
+					 check_priority(s[i]) != 0) {
+					stack_to_string(operators, &output);
+					push(operators, s[i]);
+				}
+				else {
+					push(operators, s[i]);
+				}
 			}
 		}
 	}
@@ -114,7 +116,7 @@ calculate(char* s)
 	if (s == "") exit(EXIT_FAILURE);
 
 	Stack *numbers = init_stack( strlen(s) );
-	char *str_number = (char*) malloc ( strlen(s)* sizeof(char) );
+	char *str_number = (char*) malloc ( sizeof(s) * sizeof(s) );
 
 	if (str_number == NULL) {
 		exit(EXIT_FAILURE);
@@ -125,17 +127,15 @@ calculate(char* s)
 		if (s[i] != ' ') {
 			if (isdigit(s[i]) || s[i] == '.') {
 				sprintf(str_number, "%s%c", str_number, s[i]);
-
-				if (i+1 != strlen(s) && isdigit(s[i+1])) continue;
-
-				push(numbers, strtol(str_number, NULL, 10));
-				strcpy(str_number, "");
 			} else {
 				int n1 = pop(numbers);
 				int n2 = pop(numbers);
 
 				push(numbers, execute_operation(s[i], n1, n2));
 			}
+		} else {
+			push(numbers, strtol(str_number, NULL, 10));
+			memset(str_number, 0, sizeof(str_number));
 		}
 	}
 
