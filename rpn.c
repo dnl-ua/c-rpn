@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
-int
+static int
 check_priority( char c ) 
 {
 	int result;
@@ -34,7 +34,7 @@ check_priority( char c )
 	return result;
 }
 
-int
+static int
 execute_operation(char operation, double n1, double n2) {
 	int result; // ``single exit`` or whatever
 
@@ -59,7 +59,7 @@ execute_operation(char operation, double n1, double n2) {
 	return result;
 }
 
-void
+static void
 stack_to_string(Stack *stack, char **str)
 {
 	while (!is_empty(stack)) {
@@ -113,6 +113,8 @@ parse(char* s)
 int
 calculate(char* s) 
 {
+	int result = 0;
+
 	if (s == "") exit(EXIT_FAILURE);
 
 	Stack *numbers = init_stack( strlen(s) );
@@ -140,7 +142,7 @@ calculate(char* s)
 	}
 
 	free(str_number);
-	int result = top(numbers);
+	result = top(numbers);
 	free_stack(&numbers);
 
 	return result;
