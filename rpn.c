@@ -1,5 +1,5 @@
 #include "rpn.h"
-#include "../stack/Stack.h"
+#include "c-stack/Stack.h"
 
 #include <stdio.h>
 #include <stdlib.h>
