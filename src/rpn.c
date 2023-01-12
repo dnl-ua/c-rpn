@@ -1,5 +1,5 @@
-#include "rpn.h"
-#include "c-stack/Stack.h"
+#include <rpn/rpn.h>
+#include <stack/stack.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +7,7 @@
 #include <ctype.h>
 
 static int
-check_priority( char c ) 
+check_priority( const char c ) 
 {
 	int result;
 
@@ -27,7 +27,7 @@ check_priority( char c )
 			result = 2;
 			break;
 		default:
-			result -2;
+			result = -2;
 			break;
 	}
 
@@ -35,7 +35,8 @@ check_priority( char c )
 }
 
 static int
-execute_operation(char operation, double n1, double n2) {
+execute_operation(const char operation, const double n1, const double n2) 
+{
 	int result; // ``single exit`` or whatever
 
 	switch (operation) {
@@ -68,10 +69,10 @@ stack_to_string(Stack *stack, char **str)
 }
 
 char*
-parse(char* s)
+parse(const char* s)
 {
 	Stack *operators = init_stack(strlen(s));
-	char *output = (char*)malloc( strlen(s) * sizeof(char) );
+	char *output = (char*) malloc(strlen(s) * sizeof(char));
 
 	if (output == NULL) {
 		exit(EXIT_FAILURE);
@@ -82,24 +83,25 @@ parse(char* s)
 		if (s[i] != ' ') {
 			if (isdigit(s[i])) {
 				sprintf(output, "%s%c", output, s[i]);
-			} else {
-				sprintf(output, "%s ", output);
+                continue;
+            }
 
-				if (s[i] == ')') {
-					while (top(operators) != '(') {
-						sprintf(output, "%s %c", output, pop(operators));
-					}
-					pop(operators);
-				}
-				else if (check_priority(s[i]) <= check_priority(top(operators)) &&
-					 check_priority(s[i]) != 0) {
-					stack_to_string(operators, &output);
-					push(operators, s[i]);
-				}
-				else {
-					push(operators, s[i]);
-				}
-			}
+            sprintf(output, "%s ", output);
+
+            if (s[i] == ')') {
+                while (top(operators) != '(') {
+                    sprintf(output, "%s %c", output, pop(operators));
+                }
+                pop(operators);
+            }
+            else if (check_priority(s[i]) <= check_priority(top(operators)) &&
+                 check_priority(s[i]) != 0) {
+                stack_to_string(operators, &output);
+                push(operators, s[i]);
+            }
+            else {
+                push(operators, s[i]);
+            }
 		}
 	}
 
@@ -111,14 +113,14 @@ parse(char* s)
 }
 
 int
-calculate(char* s) 
+calculate(const char* s) 
 {
 	int result = 0;
 
-	if (s == "") exit(EXIT_FAILURE);
+	if (strncmp(s, "", 1) == 0) exit(EXIT_FAILURE);
 
-	Stack *numbers = init_stack( strlen(s) );
-	char *str_number = (char*) malloc ( sizeof(s) * sizeof(s) );
+	Stack *numbers = init_stack(strlen(s));
+	char *str_number = (char*) malloc (strlen(s) * sizeof(char));
 
 	if (str_number == NULL) {
 		exit(EXIT_FAILURE);
@@ -136,11 +138,14 @@ calculate(char* s)
 				push(numbers, execute_operation(s[i], n1, n2));
 			}
 		} else {
-			push(numbers, strtol(str_number, NULL, 10));
-			memset(str_number, 0, sizeof(str_number));
+            if (*str_number != 0) {
+                push(numbers, atoi(str_number));
+            }
+            memset(str_number, 0, strlen(str_number));
 		}
 	}
 
+    free((void*) s);
 	free(str_number);
 	result = top(numbers);
 	free_stack(&numbers);
